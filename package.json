@@ -4,7 +4,7 @@
   "description": "A Read-Eval-Print-Loop (REPL) to demonstrate the KnowSheet Bricks C++ syntax.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha test/**/*.js",
     "start": "node ./run.js"
   },
   "keywords": [
