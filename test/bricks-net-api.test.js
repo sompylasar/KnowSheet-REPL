@@ -66,6 +66,18 @@ describe('bricks-net-api', function () {
 		it('should return an instance of `POST` class', function () {
 			assert.equal(true, api.POST("url") instanceof api.POST);
 		});
+		
+		it('should throw on invalid arguments', function () {
+			assert.throws(function () {
+				api.POST();
+			});
+			assert.throws(function () {
+				api.POST(1, 3, 5);
+			});
+			assert.throws(function () {
+				api.POST("url", "body", "content/type", "invalid argument");
+			});
+		});
 	});
 	
 	describe('`POSTFromFile` function', function () {
@@ -329,6 +341,68 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 		
+		it('should make a `POST` request with a JSON object', function (done) {
+			var requestObject = {
+				"object": {},
+				"array": [],
+				"number": 123.456
+			};
+			var requestJson = JSON.stringify({ "data": requestObject });
+			
+			serverRequestHandler = function (request, response) {
+				try {
+					assert.equal('POST', request.method);
+					assert.equal('/test', request.url);
+					assert.equal('1.1', request.httpVersion);
+					
+					// WARNING: `request.rawHeaders` requires Node.js 0.12.0
+					assert.deepEqual([
+						'Host',
+						'localhost',
+						'Content-Type',
+						'application/json',
+						'Content-Length',
+						requestJson.length
+					], request.rawHeaders);
+					
+					var body = '';
+					request.on('data', function (chunk) {
+						body += chunk.toString();
+					});
+					request.on('end', function () {
+						try {
+							// Test JSON request sending.
+							assert.equal(requestJson, body);
+							
+							// Test JSON response parsing.
+							response.writeHead(200, {
+								'Content-Type': 'application/json'
+							});
+							response.end(requestJson);
+						}
+						catch (ex) {
+							done(ex);
+						}
+					});
+				}
+				catch (ex) {
+					done(ex);
+				}
+			};
+			
+			var response = api.HTTP(
+				api.POST("localhost:20000/test", requestObject)
+			);
+			
+			when(
+				response.body
+			).then(function (body) {
+				assert.equal('string', typeof body, '`body` is a string');
+				assert.equal(requestJson, body, '`body` equals to the response body');
+				done();
+			}).done(undefined, done);
+		});
+		
 		it('should disallow redirects by default', function (done) {
 			serverRequestHandler = function (request, response) {
 				serverRequestHandler = function (request, response) {
@@ -411,6 +485,38 @@ describe('bricks-net-api', function () {
 				done(new Error('Resolved instead of rejected.'));
 			}, function (err) {
 				assert.equal(true, err instanceof HTTPRedirectLoopException);
+				done();
+			}).done(undefined, done);
+		});
+		
+		it('should save response to file if required', function (done) {
+			var responseFileName = (new Date()).getTime() + '_response.txt';
+			var responseFilePath = __dirname + '/' + responseFileName;
+			
+			after(function () {
+				try {
+					require('fs').unlinkSync(responseFilePath);
+				}
+				catch (ex) {
+					if (ex.code !== 'ENOENT') {
+						throw ex;
+					}
+				}
+			});
+			
+			serverRequestHandler = function (request, response) {
+				response.end('OK');
+			};
+			
+			var response = api.HTTP(api.GET("localhost:20000/test"), api.SaveResponseToFile(responseFilePath));
+			
+			when(
+				response
+			).then(function (response) {
+				assert.equal('undefined', typeof response.body, '`body` is undefined');
+				assert.equal('string', typeof response.body_file_name, '`body_file_name` is a string');
+				assert.equal(responseFilePath, response.body_file_name, '`body_file_name` equals to the requested file path');
+				assert.equal('OK', require('fs').readFileSync(responseFilePath), '`body_file_name` contents equals response body');
 				done();
 			}).done(undefined, done);
 		});
