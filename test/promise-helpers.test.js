@@ -14,6 +14,24 @@ describe('promise-helpers', function () {
 	});
 	
 	describe('`makeThenable` function', function () {
+		it('should throw on invalid arguments', function () {
+			assert.throws(function () {
+				promiseHelpers.makeThenable();
+			}, 'Error: Argument "_this" must be an object.');
+			assert.throws(function () {
+				promiseHelpers.makeThenable(undefined);
+			}, 'Error: Argument "_this" must be an object.');
+			assert.throws(function () {
+				promiseHelpers.makeThenable("string");
+			}, 'Error: Argument "_this" must be an object.');
+			assert.throws(function () {
+				promiseHelpers.makeThenable(when.defer().promise);
+			}, 'Error: Argument "_this" must not be promise-like.');
+			assert.doesNotThrow(function () {
+				promiseHelpers.makeThenable({});
+			});
+		});
+		
 		it('should return the passed owner', function () {
 			var owner = {};
 			var returnedValue = promiseHelpers.makeThenable(owner);
@@ -71,6 +89,30 @@ describe('promise-helpers', function () {
 	});
 	
 	describe('`makeThenableProperty` function', function () {
+		it('should throw on invalid arguments', function () {
+			assert.throws(function () {
+				promiseHelpers.makeThenableProperty();
+			}, 'Error: Argument "_this" must be an object.');
+			assert.throws(function () {
+				promiseHelpers.makeThenableProperty(undefined);
+			}, 'Error: Argument "_this" must be an object.');
+			assert.throws(function () {
+				promiseHelpers.makeThenableProperty("string", "property");
+			}, 'Error: Argument "_this" must be an object.');
+			assert.throws(function () {
+				promiseHelpers.makeThenableProperty({});
+			}, 'Error: Argument "property" must be a string.');
+			assert.throws(function () {
+				promiseHelpers.makeThenableProperty({}, 123);
+			}, 'Error: Argument "property" must be a string.');
+			assert.doesNotThrow(function () {
+				promiseHelpers.makeThenableProperty({}, "property");
+			});
+			assert.doesNotThrow(function () {
+				promiseHelpers.makeThenableProperty(when.defer().promise, "property");
+			});
+		});
+		
 		it('should return the property promise', function () {
 			var owner = {
 				property: "test"
