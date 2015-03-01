@@ -90,7 +90,7 @@ describe('bricks-net-api', function () {
 		//var _DEBUG_LOG = function () { _DEBUG_LOG.apply(console, arguments); };
 		
 		before(function () {
-			largeBody = (new Array(largeBodyLength)).join('X');
+			largeBody = (new Array(largeBodyLength + 1)).join('X');
 		});
 		
 		beforeEach(function (done) {
@@ -248,13 +248,13 @@ describe('bricks-net-api', function () {
 					request.on('end', function () {
 						try {
 							assert.equal(requestBody, receivedBody);
+							
+							response.end(requestBody);
 						}
 						catch (ex) {
 							done(ex);
 						}
 					});
-					
-					response.end('OK');
 				}
 				catch (ex) {
 					done(ex);
@@ -272,7 +272,7 @@ describe('bricks-net-api', function () {
 				response.body
 			).then(function (body) {
 				assert.equal('string', typeof body, '`body` is a string');
-				assert.equal('OK', body, '`body` equals to the response body');
+				assert.equal(requestBody, body, '`body` equals to the response body');
 				done();
 			}).done(undefined, done);
 		});
@@ -291,7 +291,7 @@ describe('bricks-net-api', function () {
 						'Content-Type',
 						'text/plain',
 						'Content-Length',
-						String(largeBodyLength - 1)
+						largeBodyLength
 					], request.rawHeaders);
 					
 					var body = '';
@@ -300,14 +300,16 @@ describe('bricks-net-api', function () {
 					});
 					request.on('end', function () {
 						try {
+							// Test large request sending.
 							assert.equal(largeBody, body);
+							
+							// Test large response parsing.
+							response.end(largeBody);
 						}
 						catch (ex) {
 							done(ex);
 						}
 					});
-					
-					response.end('OK');
 				}
 				catch (ex) {
 					done(ex);
@@ -322,7 +324,7 @@ describe('bricks-net-api', function () {
 				response.body
 			).then(function (body) {
 				assert.equal('string', typeof body, '`body` is a string');
-				assert.equal('OK', body, '`body` equals to the response body');
+				assert.equal(largeBody, body, '`body` equals to the response body');
 				done();
 			}).done(undefined, done);
 		});
