@@ -1,0 +1,23 @@
+{
+  "name": "knowsheet-repl",
+  "version": "1.0.0",
+  "description": "A Read-Eval-Print-Loop (REPL) to demonstrate the KnowSheet Bricks C++ syntax.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**/*.js",
+    "coverage": "istanbul cover _mocha test --recursive -- -u exports -R spec && open coverage/lcov-report/index.html",
+    "start": "node ./run.js"
+  },
+  "keywords": [
+    "KnowSheet"
+  ],
+  "author": "John Babak <babak.john@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "when": "^3.7.2"
+  },
+  "devDependencies": {
+    "istanbul": "^0.3.6",
+    "mocha": "^2.1.0"
+  }
+}
