@@ -17,7 +17,8 @@ process.stdin.on('end', function () {
 		
 		var options = {
 			terminal: !!process.stdout.isTTY,
-			useColors: require('chalk').supportsColor
+			useColors: require('chalk').supportsColor,
+			showErrorStack: (process.env.NODE_ENV === 'development')
 		};
 		
 		if (err) {
@@ -28,5 +29,7 @@ process.stdin.on('end', function () {
 		
 		process.stdout.write(prettyprint(input, result, timing, options));
 		process.exit(0);
+	}, {
+		showTransformedCode: (process.env.NODE_ENV === 'development')
 	});
 });
