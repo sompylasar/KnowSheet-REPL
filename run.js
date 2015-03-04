@@ -23,6 +23,12 @@ process.stdin.on('end', function () {
 			useColors: require('chalk').supportsColor
 		};
 		
+		// Treat `undefined` result as an error.
+		// TODO(sompylasar): Think up something for the APIs that return void.
+		if (!err && typeof result === 'undefined') {
+			err = new Error('The result is `undefined`.');
+		}
+		
 		if (err) {
 			process.stderr.write(prettyprint(input, err, timing, options));
 			process.exit(-1);
