@@ -11,16 +11,14 @@ process.stdin.setEncoding('utf-8');
 process.stdin.on('data', function (buf) { input += buf; });
 process.stdin.on('end', function () {
 	var evaluate = require('./lib/bricks-evaluate');
-	var timing = require('./lib/bricks-timing')();
 	
-	evaluate(input, function (err, result) {
-		timing.end();
-		
+	evaluate(input, function (err, result, timing) {
 		var prettyprint = require('./lib/bricks-prettyprint');
 		
 		var options = {
 			terminal: !!process.stdout.isTTY,
-			useColors: require('chalk').supportsColor
+			useColors: require('chalk').supportsColor,
+			showErrorStack: (process.env.NODE_ENV === 'development')
 		};
 		
 		if (err) {
@@ -31,5 +29,8 @@ process.stdin.on('end', function () {
 		
 		process.stdout.write(prettyprint(input, result, timing, options));
 		process.exit(0);
+	}, {
+		showContext: (process.env.NODE_ENV === 'development'),
+		showTransformedCode: (process.env.NODE_ENV === 'development')
 	});
 });
