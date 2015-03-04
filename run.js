@@ -30,6 +30,7 @@ process.stdin.on('end', function () {
 		process.stdout.write(prettyprint(input, result, timing, options));
 		process.exit(0);
 	}, {
+		showContext: (process.env.NODE_ENV === 'development'),
 		showTransformedCode: (process.env.NODE_ENV === 'development')
 	});
 });
