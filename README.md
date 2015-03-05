@@ -50,7 +50,7 @@ POST a JSON-encoded object:
 ```
 KnowSheet> JSONParse(HTTP(POST("http://httpbin.org/post", DemoObject())).body).json
 ```
-<sub>(in C++, you'll have a cerealizable object in place of the `DemoObject()`)</sub>
+<sup>(in C++, you'll have a cerealizable object in place of the `DemoObject()`)</sup>
 
 Allow redirects:
 ```
