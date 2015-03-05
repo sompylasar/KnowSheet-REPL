@@ -19,12 +19,12 @@ npm start
 ```
 The command prompt `KnowSheet> ` will appear.
 
-... or evaluate one expression from the command-line.
+... or evaluate one expression from the command-line:
 ```bash
 echo '(expression-here)' | npm start
 ```
 
-... and use the result in another command.
+... and use the result in another command:
 ```bash
 echo '(expression-here)' | npm start | cat
 ```
