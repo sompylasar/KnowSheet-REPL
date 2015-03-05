@@ -1,6 +1,6 @@
 {
   "name": "knowsheet-repl",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "description": "A Read-Eval-Print-Loop (REPL) to demonstrate the KnowSheet Bricks C++ syntax.",
   "main": "index.js",
   "scripts": {
