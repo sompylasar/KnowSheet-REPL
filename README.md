@@ -62,8 +62,12 @@ Provide a custom User-Agent:
 KnowSheet> HTTP(GET("http://httpbin.org/get").UserAgent("KnowSheet-REPL/1.0.0")).body
 ```
 
+Provide extra HTTP headers:
+```
+KnowSheet> HTTP(GET("http://httpbin.org/get?query=1", HTTPHeaders().Set("Custom", "Header"))).body
+```
+
 Chain requests:
 ```
 KnowSheet> JSONParse(HTTP(POST("http://httpbin.org/post", JSONParse(HTTP(GET("http://httpbin.org/get?query=1")).body))).body)
 ```
-

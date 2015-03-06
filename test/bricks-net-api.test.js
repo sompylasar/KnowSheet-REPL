@@ -8,6 +8,18 @@ describe('bricks-net-api', function () {
 	var HTTPRedirectLoopException = require('../lib/bricks-net-exceptions').HTTPRedirectLoopException;
 	var ConnectionResetByPeer = require('../lib/bricks-net-exceptions').ConnectionResetByPeer;
 	
+	it('should export `DefaultContentType` function', function () {
+		assert.equal('function', typeof api.DefaultContentType);
+	});
+	
+	it('should export `HTTPHeaders` function', function () {
+		assert.equal('function', typeof api.HTTPHeaders);
+	});
+	
+	it('should export `HTTPResponse` function', function () {
+		assert.equal('function', typeof api.HTTPResponse);
+	});
+	
 	it('should export `GET` function', function () {
 		assert.equal('function', typeof api.GET);
 	});
@@ -24,48 +36,171 @@ describe('bricks-net-api', function () {
 		assert.equal('function', typeof api.HTTP);
 	});
 	
-	it('should export `HTTPResponse` function', function () {
-		assert.equal('function', typeof api.HTTPResponse);
+	it('should export `JSON` function', function () {
+		assert.equal('function', typeof api.JSON);
 	});
 	
-	describe('`GET` function', function () {
-		it('should return an instance of `GET` class', function () {
-			assert.equal(true, api.GET("url") instanceof api.GET);
+	it('should export `JSONParse` function', function () {
+		assert.equal('function', typeof api.JSONParse);
+	});
+	
+	describe('`DefaultContentType`', function () {
+		it('should return "text/plain"', function () {
+			assert.strictEqual("text/plain", api.DefaultContentType());
+		});
+	});
+	
+	describe('`HTTPHeaders`', function () {
+		it('should create an instance of `HTTPHeaders` class', function () {
+			assert.equal(true, api.HTTPHeaders() instanceof api.HTTPHeaders);
 		});
 		
-		it('should set `url`', function () {
-			assert.equal('url', api.GET("url").url);
+		it('should have `headers` property which is an `Array`', function () {
+			assert.equal(true, Array.isArray(api.HTTPHeaders().headers));
 		});
 		
-		it('should `AllowRedirects` return an instance of `GET` class', function () {
-			assert.equal(true, api.GET("url").AllowRedirects() instanceof api.GET);
+		it('should have `Set` method', function () {
+			assert.equal('function', typeof api.HTTPHeaders().Set);
 		});
 		
-		it('should `AllowRedirects` set `allow_redirects`', function () {
-			assert.equal(true, api.GET("url").AllowRedirects().allow_redirects);
-			assert.equal(false, api.GET("url").AllowRedirects(false).allow_redirects);
-			assert.equal(true, api.GET("url").AllowRedirects(true).allow_redirects);
-		});
-		
-		it('should `UserAgent` return an instance of `GET` class', function () {
-			assert.equal(true, api.GET("url").UserAgent("USERAGENT") instanceof api.GET);
-		});
-		
-		it('should `UserAgent` set `custom_user_agent`', function () {
-			assert.equal("USERAGENT", api.GET("url").UserAgent("USERAGENT").custom_user_agent);
-			assert.equal("", api.GET("url").UserAgent("").custom_user_agent);
-		});
-		
-		it('should `UserAgent` throw if argument not set', function () {
-			assert.throws(function () {
-				api.GET("url").UserAgent();
+		describe('`Set` method', function () {
+			it('should add headers and allow chaining', function () {
+				var headers = api.HTTPHeaders();
+				
+				var ret = headers.Set('Custom', 'Header');
+				
+				assert.strictEqual(headers, ret);
+				
+				assert.deepEqual([
+					{
+						first: 'Custom',
+						second: 'Header'
+					}
+				], ret.headers);
+				
+				headers.Set('Custom2', 'Header2');
+				
+				assert.deepEqual([
+					{
+						first: 'Custom',
+						second: 'Header'
+					},
+					{
+						first: 'Custom2',
+						second: 'Header2'
+					}
+				], ret.headers);
 			});
 		});
 	});
 	
-	describe('`POST` function', function () {
-		it('should return an instance of `POST` class', function () {
+	describe('`GET`', function () {
+		it('should create an instance of `GET` class', function () {
+			assert.equal(true, api.GET("url") instanceof api.GET);
+		});
+		
+		it('should set `url`', function () {
+			assert.strictEqual('url', api.GET("url").url);
+		});
+		
+		it('should set `extra_headers`', function () {
+			assert.deepEqual([
+				{
+					first: 'Custom',
+					second: 'Header'
+				}
+			], api.GET("url", api.HTTPHeaders().Set('Custom', 'Header')).extra_headers);
+		});
+		
+		it('should throw on invalid arguments', function () {
+			assert.throws(function () {
+				api.GET();
+			});
+			assert.throws(function () {
+				api.GET(1);
+			});
+			assert.throws(function () {
+				api.GET("url", "invalid argument");
+			});
+			assert.throws(function () {
+				api.GET("url", api.HTTPHeaders(), "invalid argument");
+			});
+		});
+		
+		describe('`AllowRedirects` method', function () {
+			it('should allow chaining', function () {
+				var ret = api.GET("url");
+				assert.strictEqual(ret, ret.AllowRedirects());
+			});
+			
+			it('should set `allow_redirects`', function () {
+				assert.strictEqual(true, api.GET("url").AllowRedirects().allow_redirects);
+				assert.strictEqual(false, api.GET("url").AllowRedirects(false).allow_redirects);
+				assert.strictEqual(true, api.GET("url").AllowRedirects(true).allow_redirects);
+			});
+		});
+		
+		describe('`UserAgent` method', function () {
+			it('should allow chaining', function () {
+				var ret = api.GET("url");
+				assert.strictEqual(ret, ret.UserAgent("USERAGENT"));
+			});
+		
+			it('should set `custom_user_agent`', function () {
+				assert.strictEqual("USERAGENT", api.GET("url").UserAgent("USERAGENT").custom_user_agent);
+				assert.strictEqual("", api.GET("url").UserAgent("").custom_user_agent);
+			});
+		
+			it('should throw if argument not set', function () {
+				assert.throws(function () {
+					api.GET("url").UserAgent();
+				});
+			});
+		});
+	});
+	
+	describe('`POST`', function () {
+		it('should create an instance of `POST` class', function () {
 			assert.equal(true, api.POST("url") instanceof api.POST);
+		});
+		
+		it('should set `url`', function () {
+			assert.strictEqual('url', api.POST("url").url);
+		});
+		
+		it('should set `body` and `has_body` (string)', function () {
+			assert.strictEqual('body', api.POST("url", "body").body);
+			
+			assert.strictEqual(false, api.POST("url").has_body);
+			assert.strictEqual(true, api.POST("url", "body").has_body);
+			assert.strictEqual(true, api.POST("url", "").has_body);
+		});
+		
+		it('should set `body` and `has_body` (JSON)', function () {
+			var object = { test: [ 1, 2, 3 ] };
+			var body = JSON.stringify({ data: object });
+			assert.strictEqual(body, api.POST("url", object).body);
+			assert.strictEqual(true, api.POST("url", object).has_body);
+		});
+		
+		it('should set default `content_type`', function () {
+			assert.strictEqual(api.DefaultContentType(), api.POST("url").content_type);
+			assert.strictEqual(api.DefaultContentType(), api.POST("url", "body").content_type);
+			assert.strictEqual("application/json", api.POST("url", {}).content_type);
+		});
+		
+		it('should set custom `content_type`', function () {
+			assert.strictEqual("content/type", api.POST("url", "body", "content/type").content_type);
+			assert.strictEqual("content/type", api.POST("url", {}, "content/type").content_type);
+		});
+		
+		it('should set `extra_headers`', function () {
+			assert.deepEqual([
+				{
+					first: 'Custom',
+					second: 'Header'
+				}
+			], api.POST("url", "body", "content/type", api.HTTPHeaders().Set('Custom', 'Header')).extra_headers);
 		});
 		
 		it('should throw on invalid arguments', function () {
@@ -78,16 +213,19 @@ describe('bricks-net-api', function () {
 			assert.throws(function () {
 				api.POST("url", "body", "content/type", "invalid argument");
 			});
+			assert.throws(function () {
+				api.POST("url", "body", "content/type", HTTPHeaders(), "invalid argument");
+			});
 		});
 	});
 	
-	describe('`POSTFromFile` function', function () {
-		it('should return an instance of `POSTFromFile` class', function () {
+	describe('`POSTFromFile`', function () {
+		it('should create an instance of `POSTFromFile` class', function () {
 			assert.equal(true, api.POSTFromFile("url", __filename, "application/javascript") instanceof api.POSTFromFile);
 		});
 	});
 	
-	describe('`HTTP` function', function () {
+	describe('`HTTP`', function () {
 		var KBYTES_IN_BYTES = 1000;
 		var MBYTES_IN_BYTES = 1000 * KBYTES_IN_BYTES;
 		var largeBodyLength = 50 * MBYTES_IN_BYTES;
@@ -631,4 +769,30 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 	});
+	
+	describe('`JSON`', function () {
+		it('should serialize into JSON asynchronously', function (done) {
+			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+			when(
+				api.JSON(object)
+			).then(function (result) {
+				assert.strictEqual(JSON.stringify(object), result);
+				done();
+			}).done(undefined, done);
+		});
+	});
+	
+	describe('`JSONParse`', function () {
+		it('should parse JSON asynchronously', function (done) {
+			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+			var json = JSON.stringify(object);
+			when(
+				api.JSONParse(json)
+			).then(function (result) {
+				assert.deepEqual(object, result);
+				done();
+			}).done(undefined, done);
+		});
+	});
+	
 });
