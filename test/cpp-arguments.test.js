@@ -127,6 +127,17 @@ describe('cpp-arguments', function () {
 			], []);
 		});
 		
+		it('should select empty signature if other ones do not match', function () {
+			var optionalArgumentSignatureCalled = 0;
+			cppExceptions.assert('TestMethod', [
+				emptySignature,
+				[].concat(optionalArgumentSignature).concat(function () {
+					++optionalArgumentSignatureCalled;
+				})
+			], []);
+			assert.equal(0, optionalArgumentSignatureCalled);
+		});
+		
 		it('should throw if too many arguments for empty signature', function () {
 			assert.throws(function () {
 				cppExceptions.assert('TestMethod', [
