@@ -1,7 +1,17 @@
 'use strict';
 
+var program = require('commander');
+var packageJson = require('./package.json');
+
+program
+	.version(packageJson.version)
+	.option('-p, --prompt <prompt>', 'override the default prompt')
+	.parse(process.argv);
+
 if (process.stdin.isTTY) {
-	module.exports = require('./lib/repl').start();
+	module.exports = require('./lib/repl').start({
+		prompt: program.prompt
+	});
 	return;
 }
 

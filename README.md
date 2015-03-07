@@ -15,19 +15,25 @@ npm install
 
 Start the REPL from the terminal:
 ```bash
-npm start
+node run
 ```
 The command prompt `KnowSheet> ` will appear.
 
 ... or evaluate one expression from the command-line:
 ```bash
-echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | npm start
+echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | node run
 ```
 
 ... or evaluate and pass the result to another command:
 ```bash
-echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | npm start | cat
+echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | node run | cat
 ```
+
+Override the default prompt:
+```bash
+node run --prompt 'Bricks> '
+```
+The command prompt `Bricks> ` will appear.
 
 ### Expressions
 
