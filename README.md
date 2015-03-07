@@ -24,7 +24,7 @@ The command prompt `KnowSheet> ` will appear.
 echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | npm start
 ```
 
-... and use the result in another command:
+... or evaluate and pass the result to another command:
 ```bash
 echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | npm start | cat
 ```
