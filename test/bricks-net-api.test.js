@@ -178,7 +178,7 @@ describe('bricks-net-api', function () {
 		
 		it('should set `body` and `has_body` (JSON)', function () {
 			var object = { test: [ 1, 2, 3 ] };
-			var body = JSON.stringify({ data: object });
+			var body = '{"data":{"test":[1,2,3]}}';
 			assert.strictEqual(body, api.POST("url", object).body);
 			assert.strictEqual(true, api.POST("url", object).has_body);
 		});
@@ -594,7 +594,7 @@ describe('bricks-net-api', function () {
 				"array": [],
 				"number": 123.456
 			};
-			var requestJson = JSON.stringify({ "data": requestObject });
+			var requestJson = '{"data":{"object":{},"array":[],"number":123.456}}';
 			
 			serverRequestHandler = function (request, response) {
 				try {
@@ -776,7 +776,7 @@ describe('bricks-net-api', function () {
 			when(
 				api.JSON(object)
 			).then(function (result) {
-				assert.strictEqual(JSON.stringify(object), result);
+				assert.strictEqual('{"object":{"key":"value"},"array":[1,2,3]}', result);
 				done();
 			}).done(undefined, done);
 		});
@@ -785,7 +785,7 @@ describe('bricks-net-api', function () {
 	describe('`JSONParse`', function () {
 		it('should parse JSON asynchronously', function (done) {
 			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			var json = JSON.stringify(object);
+			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
 			when(
 				api.JSONParse(json)
 			).then(function (result) {

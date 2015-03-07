@@ -250,6 +250,7 @@ describe('cpp-arguments', function () {
 				{ test: "abc" },
 				123
 			];
+			// HACK(sompylasar): Using `JSON.stringify` here as a quick checksum for a nested object.
 			var signaturesChecksum = JSON.stringify(signatures);
 			var valuesChecksum = JSON.stringify(values);
 			
