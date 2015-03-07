@@ -1,5 +1,5 @@
 # KnowSheet-REPL
-A Read-Eval-Print-Loop (REPL) to demonstrate the KnowSheet Bricks C++ syntax.
+A Read-Eval-Print-Loop (REPL) shell to demonstrate the KnowSheet Bricks C++ syntax.
 
 ## Installation
 
