@@ -50,7 +50,7 @@ POST a JSON-encoded object:
 ```
 KnowSheet> JSONParse(HTTP(POST("http://httpbin.org/post", DemoObject())).body).json
 ```
-<sup>(in C++, you'll have a cerealizable object in place of the `DemoObject()`)</sup>
+<sup>The syntax mimics C++ Bricks exactly, as long as `DemoObject` is defined as a serializable type.</sup>
 
 Allow redirects:
 ```
