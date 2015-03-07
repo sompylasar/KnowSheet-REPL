@@ -21,12 +21,12 @@ The command prompt `KnowSheet> ` will appear.
 
 ... or evaluate one expression from the command-line:
 ```bash
-echo '(expression-here)' | npm start
+echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | npm start
 ```
 
 ... and use the result in another command:
 ```bash
-echo '(expression-here)' | npm start | cat
+echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | npm start | cat
 ```
 
 ### Expressions
