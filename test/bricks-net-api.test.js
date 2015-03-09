@@ -4,9 +4,11 @@ var when = require('when');
 
 describe('bricks-net-api', function () {
 	var api = require('../lib/bricks-net-api');
+	
 	var HTTPRedirectNotAllowedException = require('../lib/bricks-net-exceptions').HTTPRedirectNotAllowedException;
 	var HTTPRedirectLoopException = require('../lib/bricks-net-exceptions').HTTPRedirectLoopException;
 	var ConnectionResetByPeer = require('../lib/bricks-net-exceptions').ConnectionResetByPeer;
+	
 	
 	it('should export `DefaultContentType` function', function () {
 		assert.equal('function', typeof api.DefaultContentType);
@@ -91,6 +93,31 @@ describe('bricks-net-api', function () {
 					}
 				], ret.headers);
 			});
+		});
+	});
+	
+	describe('`JSON`', function () {
+		it('should serialize into JSON asynchronously', function (done) {
+			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+			when(
+				api.JSON(object)
+			).then(function (result) {
+				assert.strictEqual('{"object":{"key":"value"},"array":[1,2,3]}', result);
+				done();
+			}).done(undefined, done);
+		});
+	});
+	
+	describe('`JSONParse`', function () {
+		it('should parse JSON asynchronously', function (done) {
+			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
+			when(
+				api.JSONParse(json)
+			).then(function (result) {
+				assert.deepEqual(object, result);
+				done();
+			}).done(undefined, done);
 		});
 	});
 	
@@ -225,7 +252,7 @@ describe('bricks-net-api', function () {
 		});
 	});
 	
-	describe('`HTTP`', function () {
+	describe('`HTTP` (client)', function () {
 		var KBYTES_IN_BYTES = 1000;
 		var MBYTES_IN_BYTES = 1000 * KBYTES_IN_BYTES;
 		var largeBodyLength = 50 * MBYTES_IN_BYTES;
@@ -770,29 +797,137 @@ describe('bricks-net-api', function () {
 		});
 	});
 	
-	describe('`JSON`', function () {
-		it('should serialize into JSON asynchronously', function (done) {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+	describe('`HTTP` (server)', function () {
+		var serverPort = 20000;
+		
+		beforeEach(function () {
+			++serverPort;
+		});
+		
+		it('should create an HTTP server', function (done) {
+			var server = api.HTTP(serverPort);
+			
 			when(
-				api.JSON(object)
-			).then(function (result) {
-				assert.strictEqual('{"object":{"key":"value"},"array":[1,2,3]}', result);
+				server
+			).then(function (server) {
+				assert.equal('function', typeof server.Register);
+				assert.equal('function', typeof server.UnRegister);
+				assert.equal('function', typeof server.ResetAllHandlers);
+				assert.equal('function', typeof server.HandlersCount);
+				assert.strictEqual(0, server.HandlersCount());
 				done();
 			}).done(undefined, done);
 		});
-	});
-	
-	describe('`JSONParse`', function () {
-		it('should parse JSON asynchronously', function (done) {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
+		
+		it('should return the same server for the same port', function () {
+			var server = api.HTTP(serverPort);
+			var server2 = api.HTTP(serverPort);
+			
+			assert.strictEqual(server, server2);
+		});
+		
+		it('should return different servers for different ports', function () {
+			var server = api.HTTP(serverPort);
+			
+			++serverPort;
+			var server2 = api.HTTP(serverPort);
+			
+			assert.notStrictEqual(server, server2);
+		});
+		
+		it('should `Register` and `UnRegister` a handler', function (done) {
+			var server = api.HTTP(serverPort);
+			var handler = function (r) {};
+			
 			when(
-				api.JSONParse(json)
-			).then(function (result) {
-				assert.deepEqual(object, result);
+				server
+			).then(function (server) {
+				assert.strictEqual(0, server.HandlersCount());
+				assert.throws(function () {
+					server.UnRegister('/test');
+				});
+				
+				server.Register('/test', handler);
+				assert.strictEqual(1, server.HandlersCount());
+				
+				assert.throws(function () {
+					server.Register('/test', handler);
+				});
+				
+				server.UnRegister('/test');
+				assert.strictEqual(0, server.HandlersCount());
+				
+				// TODO(sompylasar): Verify the handler function was removed.
+				
+				assert.throws(function () {
+					server.UnRegister('/test');
+				});
+				
 				done();
 			}).done(undefined, done);
 		});
+		
+		it('should `ResetAllHandlers` unregister all handlers', function (done) {
+			var server = api.HTTP(serverPort);
+			var handler = function (r) {};
+			
+			when(
+				server
+			).then(function (server) {
+				assert.strictEqual(0, server.HandlersCount());
+				server.Register('/test1', handler);
+				server.Register('/test2', handler);
+				server.Register('/test3', handler);
+				assert.strictEqual(3, server.HandlersCount());
+				
+				server.ResetAllHandlers();
+				assert.strictEqual(0, server.HandlersCount());
+				
+				// TODO(sompylasar): Verify the handler functions were removed.
+				
+				done();
+			}).done(undefined, done);
+		});
+		
+		it('should handle port bind error', function (done) {
+			var portOccupier = require('http').createServer();
+			portOccupier.on('listening', function () {
+				var server = api.HTTP(serverPort);
+				
+				when(
+					server
+				).then(function (server) {
+					done(new Error('Resolved instead of rejected.'));
+				}, function (err) {
+					assert.equal(true, require('util').isError(err));
+					done();
+				}).done(undefined, done);
+			});
+			portOccupier.listen(serverPort);
+		});
+		
+		it('should accept an HTTP request', function (done) {
+			// TODO(sompylasar): Debug this test and add more tests.
+			
+			var server = api.HTTP(serverPort);
+			var handlerCalled = 0;
+			
+			when(
+				server
+			).then(function (server) {
+				server.Register('/test', function (r) {
+					++handlerCalled;
+					r('OK');
+				});
+				
+				return when(
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test")).body
+				).then(function (body) {
+					assert.strictEqual(1, handlerCalled);
+					assert.strictEqual('OK', body);
+					done();
+				});
+			}).done(undefined, done);
+		});
 	});
-	
 });
