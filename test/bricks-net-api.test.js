@@ -1,5 +1,7 @@
 var assert = require('assert');
 
+var inspect = require('util').inspect;
+
 var when = require('when');
 
 describe('bricks-net-api', function () {
@@ -12,38 +14,47 @@ describe('bricks-net-api', function () {
 	
 	it('should export `DefaultContentType` function', function () {
 		assert.equal('function', typeof api.DefaultContentType);
+		assert.equal('// KnowSheet Bricks DefaultContentType', inspect(api.DefaultContentType).toString());
 	});
 	
 	it('should export `HTTPHeaders` function', function () {
 		assert.equal('function', typeof api.HTTPHeaders);
+		assert.equal('// KnowSheet Bricks HTTPHeaders', inspect(api.HTTPHeaders).toString());
 	});
 	
 	it('should export `HTTPResponse` function', function () {
 		assert.equal('function', typeof api.HTTPResponse);
+		assert.equal('// KnowSheet Bricks HTTPResponse', inspect(api.HTTPResponse).toString());
 	});
 	
 	it('should export `GET` function', function () {
 		assert.equal('function', typeof api.GET);
+		assert.equal('// KnowSheet Bricks GET', inspect(api.GET).toString());
 	});
 	
 	it('should export `POST` function', function () {
 		assert.equal('function', typeof api.POST);
+		assert.equal('// KnowSheet Bricks POST', inspect(api.POST).toString());
 	});
 	
 	it('should export `POSTFromFile` function', function () {
 		assert.equal('function', typeof api.POSTFromFile);
+		assert.equal('// KnowSheet Bricks POSTFromFile', inspect(api.POSTFromFile).toString());
 	});
 	
 	it('should export `HTTP` function', function () {
 		assert.equal('function', typeof api.HTTP);
+		assert.equal('// KnowSheet Bricks HTTP', inspect(api.HTTP).toString());
 	});
 	
 	it('should export `JSON` function', function () {
 		assert.equal('function', typeof api.JSON);
+		assert.equal('// KnowSheet Bricks JSON', inspect(api.JSON).toString());
 	});
 	
 	it('should export `JSONParse` function', function () {
 		assert.equal('function', typeof api.JSONParse);
+		assert.equal('// KnowSheet Bricks JSONParse', inspect(api.JSONParse).toString());
 	});
 	
 	describe('`DefaultContentType`', function () {
@@ -265,7 +276,7 @@ describe('bricks-net-api', function () {
 		var serverRequestHandler;
 		
 		var _DEBUG_LOG = function () {};
-		//var _DEBUG_LOG = function () { _DEBUG_LOG.apply(console, arguments); };
+		//var _DEBUG_LOG = function () { console.log.apply(console, arguments); };
 		
 		before(function () {
 			largeBody = (new Array(largeBodyLength + 1)).join('X');
@@ -273,20 +284,20 @@ describe('bricks-net-api', function () {
 		
 		beforeEach(function (done) {
 			serverRequestHandler = function (request, response) {
-				_DEBUG_LOG('TESTS: Writing the "OK" response...');
+				_DEBUG_LOG('TEST `HTTP` (client): Writing the "OK" response...');
 				
 				response.end('OK');
 				
-				_DEBUG_LOG('TESTS: Response ended.');
+				_DEBUG_LOG('`HTTP` (client): Response ended.');
 			};
 			server = http.createServer();
 			server.on('connection', function (socket) {
 				var socketString = socket.remoteAddress + ':' + socket.remotePort;
-				_DEBUG_LOG('TESTS: Server got a connection:', socketString);
+				_DEBUG_LOG('TEST `HTTP` (client): Server got a connection:', socketString);
 				
 				sockets.push(socket);
 				socket.on('close', function () {
-					_DEBUG_LOG('TESTS: Connection closed:', socketString);
+					_DEBUG_LOG('TEST `HTTP` (client): Connection closed:', socketString);
 					
 					var index = sockets.indexOf(socket);
 					if (index >= 0) {
@@ -295,19 +306,19 @@ describe('bricks-net-api', function () {
 				});
 			});
 			server.on('request', function (request, response) {
-				_DEBUG_LOG('TESTS: Got request:', request.method, request.url, request.httpVersion, '\n', request.headers);
+				_DEBUG_LOG('TEST `HTTP` (client): Got request:', request.method, request.url, request.httpVersion, '\n', request.headers);
 				serverRequestHandler(request, response);
 			});
 			server.on('listening', function () {
-				_DEBUG_LOG('TESTS: Server is listening.');
+				_DEBUG_LOG('TEST `HTTP` (client): Server is listening.');
 				done();
 			});
 			server.listen(20000);
 		});
 		afterEach(function (done) {
-			_DEBUG_LOG('TESTS: Server is shutting down...');
+			_DEBUG_LOG('TEST `HTTP` (client): Server is shutting down...');
 			server.close(function () {
-				_DEBUG_LOG('TESTS: Server has been shut down.');
+				_DEBUG_LOG('TEST `HTTP` (client): Server has been shut down.');
 				done();
 			});
 			while (sockets.length > 0) {
@@ -800,6 +811,9 @@ describe('bricks-net-api', function () {
 	describe('`HTTP` (server)', function () {
 		var serverPort = 20000;
 		
+		var _DEBUG_LOG = function () {};
+		//var _DEBUG_LOG = function () { console.log.apply(console, arguments); };
+		
 		beforeEach(function () {
 			++serverPort;
 		});
@@ -815,6 +829,7 @@ describe('bricks-net-api', function () {
 				assert.equal('function', typeof server.ResetAllHandlers);
 				assert.equal('function', typeof server.HandlersCount);
 				assert.strictEqual(0, server.HandlersCount());
+				assert.equal('// KnowSheet Bricks HTTPServer at port ' + serverPort, inspect(server).toString());
 				done();
 			}).done(undefined, done);
 		});
@@ -907,17 +922,28 @@ describe('bricks-net-api', function () {
 		});
 		
 		it('should accept an HTTP request', function (done) {
-			// TODO(sompylasar): Debug this test and add more tests.
-			
 			var server = api.HTTP(serverPort);
 			var handlerCalled = 0;
 			
 			when(
 				server
 			).then(function (server) {
+				_DEBUG_LOG('TEST `HTTP` (server): Server done:', server);
+				
 				server.Register('/test', function (r) {
 					++handlerCalled;
+					
+					_DEBUG_LOG('TEST `HTTP` (server): Server handler called:', r);
+					
+					assert.equal('function', typeof r);
+					assert.equal('function', typeof r.SendChunkedResponse);
+					assert.equal('object', typeof r.connection);
+					assert.equal('function', typeof r.connection.SendHTTPResponse);
+					assert.equal('function', typeof r.connection.SendChunkedHTTPResponse);
+					
 					r('OK');
+					
+					_DEBUG_LOG('TEST `HTTP` (server): Server handler responded.');
 				});
 				
 				return when(
@@ -929,5 +955,7 @@ describe('bricks-net-api', function () {
 				});
 			}).done(undefined, done);
 		});
+		
+		// TODO(sompylasar): Add more tests on HTTP server.
 	});
 });
