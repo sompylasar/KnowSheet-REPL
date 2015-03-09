@@ -270,5 +270,30 @@ describe('cpp-arguments', function () {
 			assert.equal(signaturesChecksum, JSON.stringify(signatures));
 			assert.equal(valuesChecksum, JSON.stringify(values));
 		});
+		
+		it('should return the handler return value', function () {
+			var retval = {};
+			var signatures = [
+				[].concat(emptySignature).concat(function () {
+					return retval;
+				})
+			];
+			var values = [];
+			
+			assert.strictEqual(retval,
+				cppExceptions.assert('TestMethod', signatures, values));
+		});
+		
+		it('should call the handler with the passed context', function () {
+			var context = {};
+			var signatures = [
+				[].concat(emptySignature).concat(function () {
+					assert.strictEqual(context, this);
+				})
+			];
+			var values = [];
+			
+			cppExceptions.assert('TestMethod', signatures, values, context);
+		});
 	});
 });
