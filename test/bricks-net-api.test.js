@@ -52,9 +52,9 @@ describe('bricks-net-api', function () {
 		assert.equal('// KnowSheet Bricks JSON', inspect(api.JSON).toString());
 	});
 	
-	it('should export `JSONParse` function', function () {
-		assert.equal('function', typeof api.JSONParse);
-		assert.equal('// KnowSheet Bricks JSONParse', inspect(api.JSONParse).toString());
+	it('should export `ParseJSON` function', function () {
+		assert.equal('function', typeof api.ParseJSON);
+		assert.equal('// KnowSheet Bricks ParseJSON', inspect(api.ParseJSON).toString());
 	});
 	
 	describe('`DefaultContentType`', function () {
@@ -124,7 +124,7 @@ describe('bricks-net-api', function () {
 			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
 			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
 			when(
-				api.JSONParse(json)
+				api.ParseJSON(json)
 			).then(function (result) {
 				assert.deepEqual(object, result);
 				done();
