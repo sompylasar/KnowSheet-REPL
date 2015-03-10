@@ -28,6 +28,7 @@ echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | node run
 ```bash
 echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | node run | cat
 ```
+<sup>If `stdout` is not a `tty`, emits the result as text into `stdout`, the errors into `stderr`.</sup>
 
 Override the default prompt:
 ```bash
@@ -60,19 +61,49 @@ KnowSheet> HTTP(GET("http://httpbin.org/get").UserAgent("KnowSheet-REPL/1.0.0"))
 Provide extra HTTP headers:
 ```
 KnowSheet> HTTP(GET("http://httpbin.org/get?query=1", HTTPHeaders().Set("Custom", "Header"))).body
+```
+```
 KnowSheet> HTTP(POST("http://httpbin.org/post", "BODY", "text/plain", HTTPHeaders().Set("Custom", "Header"))).body
 ```
 
 ### HTTP server
 
-Start an HTTP server on port `2015`, register an endpoint `/ping` and request it:
-```
-KnowSheet> HTTP(2015).Register("/ping", [](Request r) { r("pong"); });
-KnowSheet> HTTP(GET("http://localhost:2015/ping")).body;
-```
-<sup>The handler lambda syntax mimics C++11 to a certain extent. No full support guaranteed.</sup>
+Bricks maintains a single server per port. Each server accepts connections since start till the process exits.
 
-The server accepts connections until the REPL process exits.
+Start an HTTP server on port `2015`:
+```
+KnowSheet> HTTP(2015)
+// KnowSheet Bricks HTTPServer at port 2015
+```
+
+Register an endpoint `/ping` on the HTTP server on port `2015` and request it:
+```
+KnowSheet> HTTP(2015).Register("/ping", [](Request r) { r("pong"); })
+// KnowSheet Bricks HTTPServer at port 2015
+KnowSheet> HTTP(GET("http://localhost:2015/ping")).body
+--------------------------------------------------------------------------------
+pong
+--------------------------------------------------------------------------------
+(32ms)
+```
+<sup>There can only be a single handler for a given path. The calls can be chained. The handler lambda syntax mimics C++11 to a certain extent -- no full support guaranteed.</sup>
+
+Unregister the endpoint `/ping` from the HTTP server on port `2015`:
+```
+KnowSheet> HTTP(2015).UnRegister("/ping")
+```
+
+Use the request data in an HTTP server handler:
+```
+KnowSheet> HTTP(2015).Register("/test", [](Request r){ r(r.timestamp + " " + r.method + " " + r.url.ComposeURL() + "\n" + r.body); })
+// KnowSheet Bricks HTTPServer at port 2015
+KnowSheet> HTTP(POST("localhost:2015/test", "BODY")).body
+--------------------------------------------------------------------------------
+1426024237701 POST /test
+BODY
+--------------------------------------------------------------------------------
+(12ms)
+```
 
 ### JSON
 
