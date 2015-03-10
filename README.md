@@ -49,12 +49,12 @@ KnowSheet> HTTP(POST("http://httpbin.org/post", "BODY", "text/plain")).body
 
 Parse a JSON response into an object, get a field from it:
 ```
-KnowSheet> JSONParse(HTTP(GET("http://httpbin.org/get?query=1")).body).args
+KnowSheet> ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body).args
 ```
 
 POST a JSON-encoded object:
 ```
-KnowSheet> JSONParse(HTTP(POST("http://httpbin.org/post", DemoObject())).body).json
+KnowSheet> ParseJSON(HTTP(POST("http://httpbin.org/post", DemoObject())).body).json
 ```
 <sup>The syntax mimics C++ Bricks exactly, as long as `DemoObject` is defined as a serializable type.</sup>
 
@@ -76,5 +76,5 @@ KnowSheet> HTTP(POST("http://httpbin.org/post", "BODY", "text/plain", HTTPHeader
 
 Chain requests:
 ```
-KnowSheet> JSONParse(HTTP(POST("http://httpbin.org/post", JSONParse(HTTP(GET("http://httpbin.org/get?query=1")).body))).body)
+KnowSheet> ParseJSON(HTTP(POST("http://httpbin.org/post", ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body))).body)
 ```
