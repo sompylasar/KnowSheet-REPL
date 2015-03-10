@@ -76,16 +76,17 @@ The server accepts connections until the REPL process exits.
 
 ### JSON
 
+POST a JSON-encoded instance of type `DemoObject`:
+```
+KnowSheet> HTTP(POST("http://httpbin.org/post", DemoObject())).body
+```
+<sup>The syntax mimics C++ Bricks exactly, as long as `DemoObject` is defined as a serializable type.</sup>
+
 Parse a JSON response into an object, get a field from it:
 ```
 KnowSheet> ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body).args
 ```
-
-POST a JSON-encoded object:
-```
-KnowSheet> ParseJSON(HTTP(POST("http://httpbin.org/post", DemoObject())).body).json
-```
-<sup>The syntax mimics C++ Bricks exactly, as long as `DemoObject` is defined as a serializable type.</sup>
+<sup>The syntax deviates from C++ Bricks which requires a defined type for the output instance: either `T output = ParseJSON<T>(string);` or `T output; ParseJSON(string, output);`.</sup>
 
 ### Advanced examples
 
