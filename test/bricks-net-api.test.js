@@ -119,7 +119,7 @@ describe('bricks-net-api', function () {
 		});
 	});
 	
-	describe('`JSONParse`', function () {
+	describe('`ParseJSON`', function () {
 		it('should parse JSON asynchronously', function (done) {
 			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
 			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
