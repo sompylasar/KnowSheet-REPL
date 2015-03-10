@@ -65,11 +65,14 @@ KnowSheet> HTTP(POST("http://httpbin.org/post", "BODY", "text/plain", HTTPHeader
 
 ### HTTP server
 
-Start an HTTP server and register an endpoint:
+Start an HTTP server on port `2015`, register an endpoint `/ping` and request it:
 ```
 KnowSheet> HTTP(2015).Register("/ping", [](Request r) { r("pong"); });
+KnowSheet> HTTP(GET("http://localhost:2015/ping")).body;
 ```
-<sup>The lambda syntax mimics C++11 to a certain extent. No full support guaranteed.</sup>
+<sup>The handler lambda syntax mimics C++11 to a certain extent. No full support guaranteed.</sup>
+
+The server accepts connections until the REPL process exits.
 
 ### JSON
 
