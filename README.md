@@ -23,12 +23,13 @@ The command prompt `KnowSheet> ` will appear.
 ```bash
 echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | node run
 ```
+If `stdin` is not a `tty`, the shell starts in a non-interactive mode.
 
 #### Evaluate and pass the result to another command
 ```bash
 echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | node run | cat
 ```
-<sup>If `stdout` is not a `tty`, emits the result as text into `stdout`, the errors into `stderr`.</sup>
+If `stdout` is not a `tty`, the result is emitted as text into `stdout`, the errors are emitted as text into `stderr`.
 
 #### Override the default prompt
 ```bash
