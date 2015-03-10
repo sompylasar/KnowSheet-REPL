@@ -376,7 +376,7 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 		
-		it('should handle response Content-Length', function (done) {
+		it('should handle response `Content-Length`', function (done) {
 			serverRequestHandler = function (request, response) {
 				response.writeHead(200, {
 					'Content-Length': 5
@@ -397,20 +397,21 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 		
-		/* TODO(sompylasar): Investigate further on this test failure.
-		it('should throw ConnectionResetByPeer on early close', function (done) {
+		// TODO(sompylasar): Investigate the unhandled rejection in the following test.
+		it('should throw `ConnectionResetByPeer` on early close @disabled', function (done) {
 			serverRequestHandler = function (request, response) {
 				response.writeHead(200, {
 					'Content-Length': 1000
 				});
 				response.end('Partial');
-				console.log('TEST ended.');
+				
+				_DEBUG_LOG('`HTTP` (client): Partial response sent.');
 			};
 			
 			var response = api.HTTP(api.GET("localhost:20000/test"));
 			
 			when(
-				response
+				response.body
 			).then(function (body) {
 				done(new Error('Resolved instead of rejected.'));
 			}, function (err) {
@@ -418,7 +419,6 @@ describe('bricks-net-api', function () {
 				done();
 			}).done(undefined, done);
 		});
-		// */
 		
 		it('should make a `POST` request', function (done) {
 			serverRequestHandler = function (request, response) {
@@ -516,7 +516,6 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 		
-		/* TODO(sompylasar): Investigate further on this test failure.
 		it('should make a `POST` request with a large body (' + largeBodyLength + ' bytes) non-chunked', function (done) {
 			serverRequestHandler = function (request, response) {
 				try {
@@ -546,7 +545,7 @@ describe('bricks-net-api', function () {
 							// Test receiving large non-chunked response.
 							response.writeHead(200, {
 								'Content-Type': 'application/json',
-								'Content-Length': requestJson.length
+								'Content-Length': largeBodyLength
 							});
 							response.end(largeBody);
 						}
@@ -572,7 +571,6 @@ describe('bricks-net-api', function () {
 				done();
 			}).done(undefined, done);
 		});
-		// */
 		
 		it('should make a `POST` request with a large body (' + largeBodyLength + ' bytes) chunked', function (done) {
 			serverRequestHandler = function (request, response) {
@@ -850,7 +848,7 @@ describe('bricks-net-api', function () {
 			assert.notStrictEqual(server, server2);
 		});
 		
-		it('should `Register` and `UnRegister` a handler', function (done) {
+		it('should `Register` and `UnRegister` a handler, throw errors for duplicates', function (done) {
 			var server = api.HTTP(serverPort);
 			var handler = function (r) {};
 			
@@ -931,19 +929,26 @@ describe('bricks-net-api', function () {
 				_DEBUG_LOG('TEST `HTTP` (server): Server done:', server);
 				
 				server.Register('/test', function (r) {
-					++handlerCalled;
-					
-					_DEBUG_LOG('TEST `HTTP` (server): Server handler called:', r);
-					
-					assert.equal('function', typeof r);
-					assert.equal('function', typeof r.SendChunkedResponse);
-					assert.equal('object', typeof r.connection);
-					assert.equal('function', typeof r.connection.SendHTTPResponse);
-					assert.equal('function', typeof r.connection.SendChunkedHTTPResponse);
-					
-					r('OK');
-					
-					_DEBUG_LOG('TEST `HTTP` (server): Server handler responded.');
+					// Have to try..catch here to propagate exceptions to the test suite
+					// because the server does not report them.
+					try {
+						++handlerCalled;
+						
+						_DEBUG_LOG('TEST `HTTP` (server): Server handler called:', r);
+						
+						assert.equal('function', typeof r);
+						assert.equal('function', typeof r.SendChunkedResponse);
+						assert.equal('object', typeof r.connection);
+						assert.equal('function', typeof r.connection.SendHTTPResponse);
+						assert.equal('function', typeof r.connection.SendChunkedHTTPResponse);
+						
+						r('OK');
+						
+						_DEBUG_LOG('TEST `HTTP` (server): Server handler responded.');
+					}
+					catch (ex) {
+						done(ex);
+					}
 				});
 				
 				return when(
@@ -956,6 +961,83 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 		
-		// TODO(sompylasar): Add more tests on HTTP server.
+		it('should be able to send chunked response', function (done) {
+			var server = api.HTTP(serverPort);
+			var handlerCalled = 0;
+			
+			when(
+				server
+			).then(function (server) {
+				server.Register('/test_chunked', function (r) {
+					// Have to try..catch here to propagate exceptions to the test suite
+					// because the server does not report them.
+					try {
+						++handlerCalled;
+						
+						_DEBUG_LOG('TEST `HTTP` (server): Server handler called:', r);
+						
+						var sender = r.SendChunkedResponse();
+						
+						assert.equal('object', typeof sender);
+						assert.equal('function', typeof sender.Send);
+						
+						sender.Send('OK1');
+						sender.Send('OK2');
+						sender.Send('OK3');
+						
+						_DEBUG_LOG('TEST `HTTP` (server): Server handler responded.');
+					}
+					catch (ex) {
+						done(ex);
+					}
+				});
+				
+				return when(
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test_chunked")).body
+				).then(function (body) {
+					assert.strictEqual(1, handlerCalled);
+					assert.strictEqual('OK1OK2OK3', body);
+					done();
+				});
+			}).done(undefined, done);
+		});
+		
+		it('should respond with HTTP 404 if no handler is found for the path', function (done) {
+			var server = api.HTTP(serverPort);
+			
+			when(
+				server
+			).then(function (server) {
+				return when(
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test"))
+				).then(function (response) {
+					assert.strictEqual(404, response.code);
+					assert.strictEqual('<h1>NOT FOUND</h1>\n', response.body);
+					done();
+				});
+			}).done(undefined, done);
+		});
+		
+		it('should respond with HTTP 500 if no response is sent from the handler', function (done) {
+			var server = api.HTTP(serverPort);
+			var handlerCalled = 0;
+			
+			when(
+				server
+			).then(function (server) {
+				server.Register('/test', function (r) {
+					++handlerCalled;
+				});
+				
+				return when(
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test"))
+				).then(function (response) {
+					assert.strictEqual(1, handlerCalled);
+					assert.strictEqual(500, response.code);
+					assert.strictEqual('<h1>INTERNAL SERVER ERROR</h1>\n', response.body);
+					done();
+				});
+			}).done(undefined, done);
+		});
 	});
 });
