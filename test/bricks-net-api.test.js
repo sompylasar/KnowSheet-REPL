@@ -952,10 +952,11 @@ describe('bricks-net-api', function () {
 				});
 				
 				return when(
-					api.HTTP(api.GET("http://localhost:" + serverPort + "/test")).body
-				).then(function (body) {
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test"))
+				).then(function (response) {
 					assert.strictEqual(1, handlerCalled);
-					assert.strictEqual('OK', body);
+					assert.strictEqual(200, response.code);
+					assert.strictEqual('OK', response.body);
 					done();
 				});
 			}).done(undefined, done);
@@ -993,10 +994,11 @@ describe('bricks-net-api', function () {
 				});
 				
 				return when(
-					api.HTTP(api.GET("http://localhost:" + serverPort + "/test_chunked")).body
-				).then(function (body) {
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test_chunked"))
+				).then(function (response) {
 					assert.strictEqual(1, handlerCalled);
-					assert.strictEqual('OK1OK2OK3', body);
+					assert.strictEqual(200, response.code);
+					assert.strictEqual('OK1OK2OK3', response.body);
 					done();
 				});
 			}).done(undefined, done);
@@ -1037,6 +1039,36 @@ describe('bricks-net-api', function () {
 					assert.strictEqual('<h1>INTERNAL SERVER ERROR</h1>\n', response.body);
 					done();
 				});
+			}).done(undefined, done);
+		});
+		
+		it('should accept more than one connection', function (done) {
+			var server = api.HTTP(serverPort);
+			var handlerCalled = 0;
+			
+			when(
+				server
+			).then(function (server) {
+				server.Register('/test', function (r) {
+					++handlerCalled;
+					r("OK");
+				});
+				
+				return when.resolve()
+					.then(function () {
+						_DEBUG_LOG('TEST `HTTP` (server): Sending request #1.');
+						return api.HTTP(api.GET("http://localhost:" + serverPort + "/test"));
+					})
+					.then(function () {
+						_DEBUG_LOG('TEST `HTTP` (server): Sending request #2.');
+						return api.HTTP(api.GET("http://localhost:" + serverPort + "/test"));
+					})
+					.then(function (response) {
+						assert.strictEqual(2, handlerCalled);
+						assert.strictEqual(200, response.code);
+						assert.strictEqual("OK", response.body);
+						done();
+					});
 			}).done(undefined, done);
 		});
 	});
