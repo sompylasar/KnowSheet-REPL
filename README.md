@@ -35,7 +35,7 @@ node run --prompt 'Bricks> '
 ```
 The command prompt `Bricks> ` will appear.
 
-### Expressions
+### HTTP client
 
 Perform an HTTP GET request and print the response:
 ```
@@ -46,17 +46,6 @@ Perform an HTTP POST request and print the response:
 ```
 KnowSheet> HTTP(POST("http://httpbin.org/post", "BODY", "text/plain")).body
 ```
-
-Parse a JSON response into an object, get a field from it:
-```
-KnowSheet> ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body).args
-```
-
-POST a JSON-encoded object:
-```
-KnowSheet> ParseJSON(HTTP(POST("http://httpbin.org/post", DemoObject())).body).json
-```
-<sup>The syntax mimics C++ Bricks exactly, as long as `DemoObject` is defined as a serializable type.</sup>
 
 Allow redirects:
 ```
@@ -73,6 +62,28 @@ Provide extra HTTP headers:
 KnowSheet> HTTP(GET("http://httpbin.org/get?query=1", HTTPHeaders().Set("Custom", "Header"))).body
 KnowSheet> HTTP(POST("http://httpbin.org/post", "BODY", "text/plain", HTTPHeaders().Set("Custom", "Header"))).body
 ```
+
+### HTTP server
+
+Start an HTTP server and register an endpoint:
+```
+KnowSheet> HTTP(2015).Register("/ping", [](Request r) { r("pong"); });
+```
+
+### JSON
+
+Parse a JSON response into an object, get a field from it:
+```
+KnowSheet> ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body).args
+```
+
+POST a JSON-encoded object:
+```
+KnowSheet> ParseJSON(HTTP(POST("http://httpbin.org/post", DemoObject())).body).json
+```
+<sup>The syntax mimics C++ Bricks exactly, as long as `DemoObject` is defined as a serializable type.</sup>
+
+### Advanced examples
 
 Chain requests:
 ```
