@@ -69,6 +69,7 @@ Start an HTTP server and register an endpoint:
 ```
 KnowSheet> HTTP(2015).Register("/ping", [](Request r) { r("pong"); });
 ```
+<sup>The lambda syntax mimics C++11 to a certain extent. No full support guaranteed.</sup>
 
 ### JSON
 
