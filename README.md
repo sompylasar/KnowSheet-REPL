@@ -127,7 +127,7 @@ KnowSheet> HTTP(POST("http://httpbin.org/post", DemoObject())).body
 ```
 KnowSheet> ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body).args
 ```
-<sup>The syntax deviates from C++ Bricks which requires a defined type for the output instance: either `T output = ParseJSON<T>(string);` or `T output; ParseJSON(string, output);`.</sup>
+<sup>The syntax deviates from C++ Bricks which requires a serializable type specified for the response object, for example, `auto response = ParseJSON<HttpbinGetResponse>(response_text);` or `HttpbinGetResponse response; ParseJSON(response_text, response);`.</sup>
 
 ### Advanced examples
 
@@ -135,3 +135,4 @@ KnowSheet> ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body).args
 ```
 KnowSheet> ParseJSON(HTTP(POST("http://httpbin.org/post", ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body))).body)
 ```
+<sup>In C++ Bricks, the calls to `ParseJSON` would be templated by serializable types of the response objects, for example, `ParseJSON<HttpbinPostResponse>( /* ... */ )`.</sup>
