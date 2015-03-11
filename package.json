@@ -13,6 +13,10 @@
   ],
   "author": "John Babak <babak.john@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=0.12"
+  },
+  "engineStrict": true,
   "dependencies": {
     "chalk": "^1.0.0",
     "commander": "^2.6.0",
