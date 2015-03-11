@@ -127,6 +127,17 @@ describe('cpp-arguments', function () {
 			], []);
 		});
 		
+		it('should select empty signature if other ones do not match', function () {
+			var optionalArgumentSignatureCalled = 0;
+			cppExceptions.assert('TestMethod', [
+				emptySignature,
+				[].concat(optionalArgumentSignature).concat(function () {
+					++optionalArgumentSignatureCalled;
+				})
+			], []);
+			assert.equal(0, optionalArgumentSignatureCalled);
+		});
+		
 		it('should throw if too many arguments for empty signature', function () {
 			assert.throws(function () {
 				cppExceptions.assert('TestMethod', [
@@ -250,6 +261,7 @@ describe('cpp-arguments', function () {
 				{ test: "abc" },
 				123
 			];
+			// HACK(sompylasar): Using `JSON.stringify` here as a quick checksum for a nested object.
 			var signaturesChecksum = JSON.stringify(signatures);
 			var valuesChecksum = JSON.stringify(values);
 			
