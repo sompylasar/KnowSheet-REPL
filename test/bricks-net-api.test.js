@@ -1,47 +1,60 @@
 var assert = require('assert');
 
+var inspect = require('util').inspect;
+
 var when = require('when');
 
 describe('bricks-net-api', function () {
 	var api = require('../lib/bricks-net-api');
+	
 	var HTTPRedirectNotAllowedException = require('../lib/bricks-net-exceptions').HTTPRedirectNotAllowedException;
 	var HTTPRedirectLoopException = require('../lib/bricks-net-exceptions').HTTPRedirectLoopException;
 	var ConnectionResetByPeer = require('../lib/bricks-net-exceptions').ConnectionResetByPeer;
 	
+	
 	it('should export `DefaultContentType` function', function () {
 		assert.equal('function', typeof api.DefaultContentType);
+		assert.equal('// KnowSheet Bricks DefaultContentType', inspect(api.DefaultContentType).toString());
 	});
 	
 	it('should export `HTTPHeaders` function', function () {
 		assert.equal('function', typeof api.HTTPHeaders);
+		assert.equal('// KnowSheet Bricks HTTPHeaders', inspect(api.HTTPHeaders).toString());
 	});
 	
 	it('should export `HTTPResponse` function', function () {
 		assert.equal('function', typeof api.HTTPResponse);
+		assert.equal('// KnowSheet Bricks HTTPResponse', inspect(api.HTTPResponse).toString());
 	});
 	
 	it('should export `GET` function', function () {
 		assert.equal('function', typeof api.GET);
+		assert.equal('// KnowSheet Bricks GET', inspect(api.GET).toString());
 	});
 	
 	it('should export `POST` function', function () {
 		assert.equal('function', typeof api.POST);
+		assert.equal('// KnowSheet Bricks POST', inspect(api.POST).toString());
 	});
 	
 	it('should export `POSTFromFile` function', function () {
 		assert.equal('function', typeof api.POSTFromFile);
+		assert.equal('// KnowSheet Bricks POSTFromFile', inspect(api.POSTFromFile).toString());
 	});
 	
 	it('should export `HTTP` function', function () {
 		assert.equal('function', typeof api.HTTP);
+		assert.equal('// KnowSheet Bricks HTTP', inspect(api.HTTP).toString());
 	});
 	
 	it('should export `JSON` function', function () {
 		assert.equal('function', typeof api.JSON);
+		assert.equal('// KnowSheet Bricks JSON', inspect(api.JSON).toString());
 	});
 	
-	it('should export `JSONParse` function', function () {
-		assert.equal('function', typeof api.JSONParse);
+	it('should export `ParseJSON` function', function () {
+		assert.equal('function', typeof api.ParseJSON);
+		assert.equal('// KnowSheet Bricks ParseJSON', inspect(api.ParseJSON).toString());
 	});
 	
 	describe('`DefaultContentType`', function () {
@@ -91,6 +104,31 @@ describe('bricks-net-api', function () {
 					}
 				], ret.headers);
 			});
+		});
+	});
+	
+	describe('`JSON`', function () {
+		it('should serialize into JSON asynchronously', function (done) {
+			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+			when(
+				api.JSON(object)
+			).then(function (result) {
+				assert.strictEqual('{"object":{"key":"value"},"array":[1,2,3]}', result);
+				done();
+			}).done(undefined, done);
+		});
+	});
+	
+	describe('`ParseJSON`', function () {
+		it('should parse JSON asynchronously', function (done) {
+			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
+			when(
+				api.ParseJSON(json)
+			).then(function (result) {
+				assert.deepEqual(object, result);
+				done();
+			}).done(undefined, done);
 		});
 	});
 	
@@ -225,7 +263,7 @@ describe('bricks-net-api', function () {
 		});
 	});
 	
-	describe('`HTTP`', function () {
+	describe('`HTTP` (client)', function () {
 		var KBYTES_IN_BYTES = 1000;
 		var MBYTES_IN_BYTES = 1000 * KBYTES_IN_BYTES;
 		var largeBodyLength = 50 * MBYTES_IN_BYTES;
@@ -238,7 +276,7 @@ describe('bricks-net-api', function () {
 		var serverRequestHandler;
 		
 		var _DEBUG_LOG = function () {};
-		//var _DEBUG_LOG = function () { _DEBUG_LOG.apply(console, arguments); };
+		//var _DEBUG_LOG = function () { console.log.apply(console, arguments); };
 		
 		before(function () {
 			largeBody = (new Array(largeBodyLength + 1)).join('X');
@@ -246,20 +284,20 @@ describe('bricks-net-api', function () {
 		
 		beforeEach(function (done) {
 			serverRequestHandler = function (request, response) {
-				_DEBUG_LOG('TESTS: Writing the "OK" response...');
+				_DEBUG_LOG('TEST `HTTP` (client): Writing the "OK" response...');
 				
 				response.end('OK');
 				
-				_DEBUG_LOG('TESTS: Response ended.');
+				_DEBUG_LOG('`HTTP` (client): Response ended.');
 			};
 			server = http.createServer();
 			server.on('connection', function (socket) {
 				var socketString = socket.remoteAddress + ':' + socket.remotePort;
-				_DEBUG_LOG('TESTS: Server got a connection:', socketString);
+				_DEBUG_LOG('TEST `HTTP` (client): Server got a connection:', socketString);
 				
 				sockets.push(socket);
 				socket.on('close', function () {
-					_DEBUG_LOG('TESTS: Connection closed:', socketString);
+					_DEBUG_LOG('TEST `HTTP` (client): Connection closed:', socketString);
 					
 					var index = sockets.indexOf(socket);
 					if (index >= 0) {
@@ -268,19 +306,19 @@ describe('bricks-net-api', function () {
 				});
 			});
 			server.on('request', function (request, response) {
-				_DEBUG_LOG('TESTS: Got request:', request.method, request.url, request.httpVersion, '\n', request.headers);
+				_DEBUG_LOG('TEST `HTTP` (client): Got request:', request.method, request.url, request.httpVersion, '\n', request.headers);
 				serverRequestHandler(request, response);
 			});
 			server.on('listening', function () {
-				_DEBUG_LOG('TESTS: Server is listening.');
+				_DEBUG_LOG('TEST `HTTP` (client): Server is listening.');
 				done();
 			});
 			server.listen(20000);
 		});
 		afterEach(function (done) {
-			_DEBUG_LOG('TESTS: Server is shutting down...');
+			_DEBUG_LOG('TEST `HTTP` (client): Server is shutting down...');
 			server.close(function () {
-				_DEBUG_LOG('TESTS: Server has been shut down.');
+				_DEBUG_LOG('TEST `HTTP` (client): Server has been shut down.');
 				done();
 			});
 			while (sockets.length > 0) {
@@ -338,7 +376,7 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 		
-		it('should handle response Content-Length', function (done) {
+		it('should handle response `Content-Length`', function (done) {
 			serverRequestHandler = function (request, response) {
 				response.writeHead(200, {
 					'Content-Length': 5
@@ -359,20 +397,21 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 		
-		/* TODO(sompylasar): Investigate further on this test failure.
-		it('should throw ConnectionResetByPeer on early close', function (done) {
+		// TODO(sompylasar): Investigate the unhandled rejection in the following test.
+		it('should throw `ConnectionResetByPeer` on early close @disabled', function (done) {
 			serverRequestHandler = function (request, response) {
 				response.writeHead(200, {
 					'Content-Length': 1000
 				});
 				response.end('Partial');
-				console.log('TEST ended.');
+				
+				_DEBUG_LOG('`HTTP` (client): Partial response sent.');
 			};
 			
 			var response = api.HTTP(api.GET("localhost:20000/test"));
 			
 			when(
-				response
+				response.body
 			).then(function (body) {
 				done(new Error('Resolved instead of rejected.'));
 			}, function (err) {
@@ -380,7 +419,6 @@ describe('bricks-net-api', function () {
 				done();
 			}).done(undefined, done);
 		});
-		// */
 		
 		it('should make a `POST` request', function (done) {
 			serverRequestHandler = function (request, response) {
@@ -478,7 +516,6 @@ describe('bricks-net-api', function () {
 			}).done(undefined, done);
 		});
 		
-		/* TODO(sompylasar): Investigate further on this test failure.
 		it('should make a `POST` request with a large body (' + largeBodyLength + ' bytes) non-chunked', function (done) {
 			serverRequestHandler = function (request, response) {
 				try {
@@ -508,7 +545,7 @@ describe('bricks-net-api', function () {
 							// Test receiving large non-chunked response.
 							response.writeHead(200, {
 								'Content-Type': 'application/json',
-								'Content-Length': requestJson.length
+								'Content-Length': largeBodyLength
 							});
 							response.end(largeBody);
 						}
@@ -534,7 +571,6 @@ describe('bricks-net-api', function () {
 				done();
 			}).done(undefined, done);
 		});
-		// */
 		
 		it('should make a `POST` request with a large body (' + largeBodyLength + ' bytes) chunked', function (done) {
 			serverRequestHandler = function (request, response) {
@@ -770,29 +806,270 @@ describe('bricks-net-api', function () {
 		});
 	});
 	
-	describe('`JSON`', function () {
-		it('should serialize into JSON asynchronously', function (done) {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+	describe('`HTTP` (server)', function () {
+		var serverPort = 20000;
+		
+		var _DEBUG_LOG = function () {};
+		//var _DEBUG_LOG = function () { console.log.apply(console, arguments); };
+		
+		beforeEach(function () {
+			++serverPort;
+		});
+		
+		it('should create an HTTP server', function (done) {
+			var server = api.HTTP(serverPort);
+			
 			when(
-				api.JSON(object)
-			).then(function (result) {
-				assert.strictEqual('{"object":{"key":"value"},"array":[1,2,3]}', result);
+				server
+			).then(function (server) {
+				assert.equal('function', typeof server.Register);
+				assert.equal('function', typeof server.UnRegister);
+				assert.equal('function', typeof server.ResetAllHandlers);
+				assert.equal('function', typeof server.HandlersCount);
+				assert.strictEqual(0, server.HandlersCount());
+				assert.equal('// KnowSheet Bricks HTTPServer at port ' + serverPort, inspect(server).toString());
 				done();
 			}).done(undefined, done);
 		});
-	});
-	
-	describe('`JSONParse`', function () {
-		it('should parse JSON asynchronously', function (done) {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
+		
+		it('should return the same server for the same port', function () {
+			var server = api.HTTP(serverPort);
+			var server2 = api.HTTP(serverPort);
+			
+			assert.strictEqual(server, server2);
+		});
+		
+		it('should return different servers for different ports', function () {
+			var server = api.HTTP(serverPort);
+			
+			++serverPort;
+			var server2 = api.HTTP(serverPort);
+			
+			assert.notStrictEqual(server, server2);
+		});
+		
+		it('should `Register` and `UnRegister` a handler, throw errors for duplicates', function (done) {
+			var server = api.HTTP(serverPort);
+			var handler = function (r) {};
+			
 			when(
-				api.JSONParse(json)
-			).then(function (result) {
-				assert.deepEqual(object, result);
+				server
+			).then(function (server) {
+				assert.strictEqual(0, server.HandlersCount());
+				assert.throws(function () {
+					server.UnRegister('/test');
+				});
+				
+				server.Register('/test', handler);
+				assert.strictEqual(1, server.HandlersCount());
+				
+				assert.throws(function () {
+					server.Register('/test', handler);
+				});
+				
+				server.UnRegister('/test');
+				assert.strictEqual(0, server.HandlersCount());
+				
+				// TODO(sompylasar): Verify the handler function was removed.
+				
+				assert.throws(function () {
+					server.UnRegister('/test');
+				});
+				
 				done();
 			}).done(undefined, done);
 		});
+		
+		it('should `ResetAllHandlers` unregister all handlers', function (done) {
+			var server = api.HTTP(serverPort);
+			var handler = function (r) {};
+			
+			when(
+				server
+			).then(function (server) {
+				assert.strictEqual(0, server.HandlersCount());
+				server.Register('/test1', handler);
+				server.Register('/test2', handler);
+				server.Register('/test3', handler);
+				assert.strictEqual(3, server.HandlersCount());
+				
+				server.ResetAllHandlers();
+				assert.strictEqual(0, server.HandlersCount());
+				
+				// TODO(sompylasar): Verify the handler functions were removed.
+				
+				done();
+			}).done(undefined, done);
+		});
+		
+		it('should handle port bind error', function (done) {
+			var portOccupier = require('http').createServer();
+			portOccupier.on('listening', function () {
+				var server = api.HTTP(serverPort);
+				
+				when(
+					server
+				).then(function (server) {
+					done(new Error('Resolved instead of rejected.'));
+				}, function (err) {
+					assert.equal(true, require('util').isError(err));
+					done();
+				}).done(undefined, done);
+			});
+			portOccupier.listen(serverPort);
+		});
+		
+		it('should accept an HTTP request', function (done) {
+			var server = api.HTTP(serverPort);
+			var handlerCalled = 0;
+			
+			when(
+				server
+			).then(function (server) {
+				_DEBUG_LOG('TEST `HTTP` (server): Server done:', server);
+				
+				server.Register('/test', function (r) {
+					// Have to try..catch here to propagate exceptions to the test suite
+					// because the server does not report them.
+					try {
+						++handlerCalled;
+						
+						_DEBUG_LOG('TEST `HTTP` (server): Server handler called:', r);
+						
+						assert.equal('function', typeof r);
+						assert.equal('function', typeof r.SendChunkedResponse);
+						assert.equal('object', typeof r.connection);
+						assert.equal('function', typeof r.connection.SendHTTPResponse);
+						assert.equal('function', typeof r.connection.SendChunkedHTTPResponse);
+						
+						r('OK');
+						
+						_DEBUG_LOG('TEST `HTTP` (server): Server handler responded.');
+					}
+					catch (ex) {
+						done(ex);
+					}
+				});
+				
+				return when(
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test"))
+				).then(function (response) {
+					assert.strictEqual(1, handlerCalled);
+					assert.strictEqual(200, response.code);
+					assert.strictEqual('OK', response.body);
+					done();
+				});
+			}).done(undefined, done);
+		});
+		
+		it('should be able to send chunked response', function (done) {
+			var server = api.HTTP(serverPort);
+			var handlerCalled = 0;
+			
+			when(
+				server
+			).then(function (server) {
+				server.Register('/test_chunked', function (r) {
+					// Have to try..catch here to propagate exceptions to the test suite
+					// because the server does not report them.
+					try {
+						++handlerCalled;
+						
+						_DEBUG_LOG('TEST `HTTP` (server): Server handler called:', r);
+						
+						var sender = r.SendChunkedResponse();
+						
+						assert.equal('object', typeof sender);
+						assert.equal('function', typeof sender.Send);
+						
+						sender.Send('OK1');
+						sender.Send('OK2');
+						sender.Send('OK3');
+						
+						_DEBUG_LOG('TEST `HTTP` (server): Server handler responded.');
+					}
+					catch (ex) {
+						done(ex);
+					}
+				});
+				
+				return when(
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test_chunked"))
+				).then(function (response) {
+					assert.strictEqual(1, handlerCalled);
+					assert.strictEqual(200, response.code);
+					assert.strictEqual('OK1OK2OK3', response.body);
+					done();
+				});
+			}).done(undefined, done);
+		});
+		
+		it('should respond with HTTP 404 if no handler is found for the path', function (done) {
+			var server = api.HTTP(serverPort);
+			
+			when(
+				server
+			).then(function (server) {
+				return when(
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test"))
+				).then(function (response) {
+					assert.strictEqual(404, response.code);
+					assert.strictEqual('<h1>NOT FOUND</h1>\n', response.body);
+					done();
+				});
+			}).done(undefined, done);
+		});
+		
+		it('should respond with HTTP 500 if no response is sent from the handler', function (done) {
+			var server = api.HTTP(serverPort);
+			var handlerCalled = 0;
+			
+			when(
+				server
+			).then(function (server) {
+				server.Register('/test', function (r) {
+					++handlerCalled;
+				});
+				
+				return when(
+					api.HTTP(api.GET("http://localhost:" + serverPort + "/test"))
+				).then(function (response) {
+					assert.strictEqual(1, handlerCalled);
+					assert.strictEqual(500, response.code);
+					assert.strictEqual('<h1>INTERNAL SERVER ERROR</h1>\n', response.body);
+					done();
+				});
+			}).done(undefined, done);
+		});
+		
+		it('should accept more than one connection', function (done) {
+			var server = api.HTTP(serverPort);
+			var handlerCalled = 0;
+			
+			when(
+				server
+			).then(function (server) {
+				server.Register('/test', function (r) {
+					++handlerCalled;
+					r("OK");
+				});
+				
+				return when.resolve()
+					.then(function () {
+						_DEBUG_LOG('TEST `HTTP` (server): Sending request #1.');
+						return api.HTTP(api.GET("http://localhost:" + serverPort + "/test"));
+					})
+					.then(function () {
+						_DEBUG_LOG('TEST `HTTP` (server): Sending request #2.');
+						return api.HTTP(api.GET("http://localhost:" + serverPort + "/test"));
+					})
+					.then(function (response) {
+						assert.strictEqual(2, handlerCalled);
+						assert.strictEqual(200, response.code);
+						assert.strictEqual("OK", response.body);
+						done();
+					});
+			}).done(undefined, done);
+		});
 	});
-	
 });
