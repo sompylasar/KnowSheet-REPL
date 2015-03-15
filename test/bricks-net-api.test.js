@@ -108,27 +108,31 @@ describe('bricks-net-api', function () {
 	});
 	
 	describe('`JSON`', function () {
-		it('should serialize into JSON asynchronously', function (done) {
+		it('should serialize a serializable into JSON', function () {
 			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			when(
+			object.serialize = function () {
+				return object;
+			};
+			var expected = '{"object":{"key":"value"},"array":[1,2,3]}';
+			var actual = api.JSON(object);
+			assert.strictEqual(expected, actual);
+		});
+		
+		it('should throw for non-serializable', function () {
+			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+			assert.throws(function () {
 				api.JSON(object)
-			).then(function (result) {
-				assert.strictEqual('{"object":{"key":"value"},"array":[1,2,3]}', result);
-				done();
-			}).done(undefined, done);
+			});
 		});
 	});
 	
 	describe('`ParseJSON`', function () {
-		it('should parse JSON asynchronously', function (done) {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
+		it('should parse JSON into a serializable', function () {
 			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
-			when(
-				api.ParseJSON(json)
-			).then(function (result) {
-				assert.deepEqual(object, result);
-				done();
-			}).done(undefined, done);
+			var expected = { object: { key: "value" }, array: [ 1, 2, 3] };
+			var actual = api.ParseJSON(json);
+			assert.deepEqual(expected, actual);
+			assert.equal('function', typeof actual.serialize);
 		});
 	});
 	
