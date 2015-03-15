@@ -110,9 +110,7 @@ describe('bricks-net-api', function () {
 	describe('`JSON`', function () {
 		it('should serialize a serializable into JSON', function () {
 			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			object.serialize = function () {
-				return object;
-			};
+			require('../lib/bricks-json').Serializable.call(object);
 			var expected = '{"object":{"key":"value"},"array":[1,2,3]}';
 			var actual = api.JSON(object);
 			assert.strictEqual(expected, actual);
