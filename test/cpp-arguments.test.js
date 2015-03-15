@@ -21,19 +21,23 @@ describe('cpp-arguments', function () {
 	
 	describe('`assertion` function', function () {
 		it('should create assertions for base assertion types', function () {
+			function TestObject() {}
+			
 			var baseAssertions = {
 				'bool': false,
 				'string': "abc",
 				'int': 123,
 				'double': 0.5,
-				'object': { test: { something: "foo" } }
+				'object': new TestObject(),
+				'plainObject': { test: { something: "foo" } }
 			};
 			var baseAssertionsNegative = {
 				'bool': "abc",
 				'string': 123,
 				'int': 0.5,
 				'double': { test: { something: "foo" } },
-				'object': false
+				'object': false,
+				'plainObject': new TestObject()
 			};
 			
 			Object.keys(baseAssertions).forEach(function (assertionName) {

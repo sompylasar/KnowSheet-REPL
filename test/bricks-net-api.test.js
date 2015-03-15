@@ -107,31 +107,6 @@ describe('bricks-net-api', function () {
 		});
 	});
 	
-	describe('`JSON`', function () {
-		it('should serialize into JSON asynchronously', function (done) {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			when(
-				api.JSON(object)
-			).then(function (result) {
-				assert.strictEqual('{"object":{"key":"value"},"array":[1,2,3]}', result);
-				done();
-			}).done(undefined, done);
-		});
-	});
-	
-	describe('`ParseJSON`', function () {
-		it('should parse JSON asynchronously', function (done) {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
-			when(
-				api.ParseJSON(json)
-			).then(function (result) {
-				assert.deepEqual(object, result);
-				done();
-			}).done(undefined, done);
-		});
-	});
-	
 	describe('`GET`', function () {
 		it('should create an instance of `GET` class', function () {
 			assert.equal(true, api.GET("url") instanceof api.GET);

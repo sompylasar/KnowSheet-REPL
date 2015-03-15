@@ -13,7 +13,7 @@ npm install
 
 ## Usage
 
-#### Start the interactive shell
+#### Start the interactive REPL
 ```bash
 node run
 ```
@@ -23,7 +23,7 @@ The command prompt `KnowSheet> ` will appear.
 ```bash
 echo 'HTTP(GET("http://httpbin.org/get?query=1")).body' | node run
 ```
-If `stdin` is not a `tty`, the shell starts in a non-interactive mode.
+If `stdin` is not a `tty`, the REPL starts in a non-interactive mode.
 
 #### Evaluate and pass the result to another command
 ```bash
@@ -39,8 +39,7 @@ The command prompt `Bricks> ` will appear.
 
 ### HTTP client
 
-* Bricks provides utilities to perform HTTP requests.
-* By default, the redirects are forbidden and result in an error. They can be enabled per request.
+Bricks provides utilities to perform HTTP requests. By default, the redirects are forbidden and result in an error; they can be enabled per request.
 
 #### Perform an HTTP GET request
 ```
@@ -75,17 +74,17 @@ KnowSheet> HTTP(POST("http://httpbin.org/post", "BODY", "text/plain", HTTPHeader
 
 ### HTTP server
 
-* Bricks maintains a single server per port.
-* Each server accepts connections since start till the process exits.
-* There can only be a single handler for a given path.
-* The calls to the server methods can be chained.
-* The handler lambda syntax in the REPL mimics C++11 to a certain extent -- no full lambda support guaranteed.
+Bricks provides utilities to create simple HTTP-based servers.
 
 #### Start an HTTP server
 ```
 KnowSheet> HTTP(2015)
 // KnowSheet Bricks HTTPServer at port 2015
 ```
+
+* Bricks maintains a single server per port. The first call to `HTTP` with a port number starts an HTTP server on that port and returns an instance of the server. The next calls with the same port reference the started server.
+* The calls to the server methods can be chained (each method returns the server instance).
+* Each server accepts connections since start till the process exits (there is no way to explicitly stop it).
 
 #### Register an endpoint on an HTTP server
 ```
@@ -97,6 +96,9 @@ pong
 --------------------------------------------------------------------------------
 (32ms)
 ```
+
+* There can only be a single handler for an endpoint path. The handler is expected to dispatch by HTTP method (verb).
+* The handler lambda syntax in the REPL mimics C++11 to a certain extent -- no full lambda support guaranteed.
 
 #### Unregister an endpoint from an HTTP server
 ```
@@ -117,17 +119,21 @@ BODY
 
 ### JSON
 
+Bricks provides utilities to parse [JSON](http://json.org/) strings into instances of serializable types and serialize them back into JSON. The REPL mimics Bricks C++ syntax to a certain extent.
+
 #### POST a JSON-encoded instance of a serializable type
 ```
 KnowSheet> HTTP(POST("http://httpbin.org/post", DemoObject())).body
 ```
-<sup>The syntax mimics C++ Bricks exactly, as long as `DemoObject` is defined as a serializable type.</sup>
+
+The syntax mimics C++ Bricks exactly, as long as `DemoObject` is defined as a serializable type.
 
 #### Parse a JSON response into an object
 ```
 KnowSheet> ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body).args
 ```
-<sup>The syntax deviates from C++ Bricks which requires a serializable type specified for the response object, for example, `auto response = ParseJSON<HttpbinGetResponse>(response_text);` or `HttpbinGetResponse response; ParseJSON(response_text, response);`.</sup>
+
+The syntax deviates from C++ Bricks which requires a serializable type specified for the response object, for example, `auto response = ParseJSON<HttpbinGetResponse>(response_text);` or `HttpbinGetResponse response; ParseJSON(response_text, response);`.
 
 ### Advanced examples
 
@@ -135,4 +141,5 @@ KnowSheet> ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body).args
 ```
 KnowSheet> ParseJSON(HTTP(POST("http://httpbin.org/post", ParseJSON(HTTP(GET("http://httpbin.org/get?query=1")).body))).body)
 ```
-<sup>In C++ Bricks, the calls to `ParseJSON` would be templated by serializable types of the response objects, for example, `ParseJSON<HttpbinPostResponse>( /* ... */ )`.</sup>
+
+In C++ Bricks, the calls to `ParseJSON` would be templated by serializable types of the response objects, for example, `ParseJSON<HttpbinPostResponse>( /* ... */ )`.
