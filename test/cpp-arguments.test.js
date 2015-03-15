@@ -29,13 +29,13 @@ describe('cpp-arguments', function () {
 				'int': 123,
 				'double': 0.5,
 				'object': new TestObject(),
-				'plainObject': { test: { something: "foo" } }
+				'plainObject': {}
 			};
 			var baseAssertionsNegative = {
 				'bool': "abc",
 				'string': 123,
 				'int': 0.5,
-				'double': { test: { something: "foo" } },
+				'double': {},
 				'object': false,
 				'plainObject': new TestObject()
 			};
