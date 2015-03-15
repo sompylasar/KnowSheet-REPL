@@ -39,7 +39,7 @@ The command prompt `Bricks> ` will appear.
 
 ### HTTP client
 
-Bricks provides utilities to perform HTTP requests. By default, the redirects are forbidden and result in an error; they can be enabled per request.
+Bricks provides utilities to perform HTTP requests. By default, redirects are forbidden and result in an error; they can be enabled per request.
 
 #### Perform an HTTP GET request
 ```
