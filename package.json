@@ -20,6 +20,7 @@
   "dependencies": {
     "chalk": "^1.0.0",
     "commander": "^2.6.0",
+    "contextify": "^0.1.13",
     "recast": "^0.10.4",
     "when": "^3.7.2"
   },
