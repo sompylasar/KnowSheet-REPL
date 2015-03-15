@@ -871,7 +871,16 @@ describe('bricks-net-api', function () {
 				server.ResetAllHandlers();
 				assert.strictEqual(0, server.HandlersCount());
 				
-				// TODO(sompylasar): Verify the handler functions were removed.
+				// Verify the handler functions were removed.
+				assert.throws(function () {
+					server.UnRegister('/test1');
+				});
+				assert.throws(function () {
+					server.UnRegister('/test2');
+				});
+				assert.throws(function () {
+					server.UnRegister('/test3');
+				});
 				
 				done();
 			}).done(undefined, done);
