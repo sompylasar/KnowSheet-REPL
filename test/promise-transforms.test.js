@@ -368,7 +368,6 @@ describe('promise-transforms', function () {
 		'');
 		var actual = transforms.transformCode(source, extend(extend({}, transformOptions), {
 			globals: {
-				"GlobalFn": "GlobalFn",
 				"SyntaxError": "__SyntaxError",
 				"HTTP": "HTTP",
 				"GET": "GET",
