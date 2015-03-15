@@ -82,9 +82,9 @@ KnowSheet> HTTP(2015)
 // KnowSheet Bricks HTTPServer at port 2015
 ```
 
-* Bricks maintains a single server per port. The first call to `HTTP` with a port number starts an HTTP server on that port and returns an instance of the server. The next calls with the same port reference the started server.
+* Bricks maintains a single server per port. No need to explicitly start a server: the first call to `HTTP` with a port number starts a server on that port and returns an instance of the server; the next calls with the same port reference the started server.
 * The calls to the server methods can be chained (each method returns the server instance).
-* Each server accepts connections since start till the process exits (there is no way to explicitly stop it).
+* Each server accepts connections since its start till the process exits. No need to explicitly stop it.
 
 #### Register an endpoint on an HTTP server
 ```
@@ -98,7 +98,7 @@ pong
 ```
 
 * There can only be a single handler for an endpoint path. The handler is expected to dispatch by HTTP method (verb).
-* The handler lambda syntax in the REPL mimics C++11 to a certain extent -- no full lambda support guaranteed.
+* The handler lambda syntax in the REPL mimics C++11 to a certain extent -- no full lambda support is guaranteed.
 
 #### Unregister an endpoint from an HTTP server
 ```
