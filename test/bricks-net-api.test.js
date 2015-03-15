@@ -107,33 +107,6 @@ describe('bricks-net-api', function () {
 		});
 	});
 	
-	describe('`JSON`', function () {
-		it('should serialize a serializable into JSON', function () {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			require('../lib/bricks-json').Serializable.call(object);
-			var expected = '{"object":{"key":"value"},"array":[1,2,3]}';
-			var actual = api.JSON(object);
-			assert.strictEqual(expected, actual);
-		});
-		
-		it('should throw for non-serializable', function () {
-			var object = { object: { key: "value" }, array: [ 1, 2, 3] };
-			assert.throws(function () {
-				api.JSON(object)
-			});
-		});
-	});
-	
-	describe('`ParseJSON`', function () {
-		it('should parse JSON into a serializable', function () {
-			var json = '{"object":{"key":"value"},"array":[1,2,3]}';
-			var expected = { object: { key: "value" }, array: [ 1, 2, 3] };
-			var actual = api.ParseJSON(json);
-			assert.deepEqual(expected, actual);
-			assert.equal('function', typeof actual.serialize);
-		});
-	});
-	
 	describe('`GET`', function () {
 		it('should create an instance of `GET` class', function () {
 			assert.equal(true, api.GET("url") instanceof api.GET);
