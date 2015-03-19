@@ -14,47 +14,47 @@ describe('bricks-net-api', function () {
 	
 	it('should export `DefaultContentType` function', function () {
 		assert.equal('function', typeof api.DefaultContentType);
-		assert.equal('// KnowSheet Bricks DefaultContentType', inspect(api.DefaultContentType).toString());
+		assert.equal('// KnowSheet Bricks DefaultContentType.', inspect(api.DefaultContentType).toString());
 	});
 	
 	it('should export `HTTPHeaders` function', function () {
 		assert.equal('function', typeof api.HTTPHeaders);
-		assert.equal('// KnowSheet Bricks HTTPHeaders', inspect(api.HTTPHeaders).toString());
+		assert.equal('// KnowSheet Bricks HTTPHeaders.', inspect(api.HTTPHeaders).toString());
 	});
 	
 	it('should export `HTTPResponse` function', function () {
 		assert.equal('function', typeof api.HTTPResponse);
-		assert.equal('// KnowSheet Bricks HTTPResponse', inspect(api.HTTPResponse).toString());
+		assert.equal('// KnowSheet Bricks HTTPResponse.', inspect(api.HTTPResponse).toString());
 	});
 	
 	it('should export `GET` function', function () {
 		assert.equal('function', typeof api.GET);
-		assert.equal('// KnowSheet Bricks GET', inspect(api.GET).toString());
+		assert.equal('// KnowSheet Bricks GET.', inspect(api.GET).toString());
 	});
 	
 	it('should export `POST` function', function () {
 		assert.equal('function', typeof api.POST);
-		assert.equal('// KnowSheet Bricks POST', inspect(api.POST).toString());
+		assert.equal('// KnowSheet Bricks POST.', inspect(api.POST).toString());
 	});
 	
 	it('should export `POSTFromFile` function', function () {
 		assert.equal('function', typeof api.POSTFromFile);
-		assert.equal('// KnowSheet Bricks POSTFromFile', inspect(api.POSTFromFile).toString());
+		assert.equal('// KnowSheet Bricks POSTFromFile.', inspect(api.POSTFromFile).toString());
 	});
 	
 	it('should export `HTTP` function', function () {
 		assert.equal('function', typeof api.HTTP);
-		assert.equal('// KnowSheet Bricks HTTP', inspect(api.HTTP).toString());
+		assert.equal('// KnowSheet Bricks HTTP.', inspect(api.HTTP).toString());
 	});
 	
 	it('should export `JSON` function', function () {
 		assert.equal('function', typeof api.JSON);
-		assert.equal('// KnowSheet Bricks JSON', inspect(api.JSON).toString());
+		assert.equal('// KnowSheet Bricks JSON.', inspect(api.JSON).toString());
 	});
 	
 	it('should export `ParseJSON` function', function () {
 		assert.equal('function', typeof api.ParseJSON);
-		assert.equal('// KnowSheet Bricks ParseJSON', inspect(api.ParseJSON).toString());
+		assert.equal('// KnowSheet Bricks ParseJSON.', inspect(api.ParseJSON).toString());
 	});
 	
 	describe('`DefaultContentType`', function () {
@@ -802,7 +802,7 @@ describe('bricks-net-api', function () {
 				assert.equal('function', typeof server.ResetAllHandlers);
 				assert.equal('function', typeof server.HandlersCount);
 				assert.strictEqual(0, server.HandlersCount());
-				assert.equal('// KnowSheet Bricks HTTPServer at port ' + serverPort, inspect(server).toString());
+				assert.equal('// KnowSheet Bricks HTTPServer at port ' + serverPort + '.', inspect(server).toString());
 				done();
 			}).done(undefined, done);
 		});
@@ -871,7 +871,16 @@ describe('bricks-net-api', function () {
 				server.ResetAllHandlers();
 				assert.strictEqual(0, server.HandlersCount());
 				
-				// TODO(sompylasar): Verify the handler functions were removed.
+				// Verify the handler functions were removed.
+				assert.throws(function () {
+					server.UnRegister('/test1');
+				});
+				assert.throws(function () {
+					server.UnRegister('/test2');
+				});
+				assert.throws(function () {
+					server.UnRegister('/test3');
+				});
 				
 				done();
 			}).done(undefined, done);
